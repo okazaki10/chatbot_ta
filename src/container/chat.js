@@ -7,7 +7,7 @@ import { colors } from '../globalstyles';
 import style from '../globalstyles';
 import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPaperPlane, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faQuestion, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from 'react-native-gesture-handler';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -71,9 +71,9 @@ function Chat(props) {
                         } else if (tagstr == 3) {
                             pesan = "\n\nSepertinya Keluhanmu memiliki gejala depresi berat, semua pasti ada jalan kok ٩(＾◡＾)۶"
                         }
-                        data2.push({ text: text+pesan, id: 2, sender: 'Bot' })
+                        data2.push({ text: text + pesan, id: 2, sender: 'Bot' })
                         setdata(data2)
-                        
+
                         var totalskor2 = totalskor + tagstr
                         console.log(totalskor)
                         var total2 = total + 1
@@ -186,6 +186,16 @@ function Chat(props) {
             </Modal>
 
             <View style={{ flex: 1 }}>
+                <View style={{ alignItems: "center", justifyContent: "center", height: 50, flexDirection: "row" }}>
+                    <View style={{ flex: 1 }}></View>
+                    <Text style={{ fontSize: 28, fontWeight: "bold" }}>Chat</Text>
+                    <View style={{ flex: 1, alignItems: "flex-end", marginRight: 20 }}>
+                        <TouchableOpacity onPress={()=>{props.navigation.navigate("Guide")}}>
+                            <FontAwesomeIcon icon={faQuestion} size={24} color={colors.primary} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={[style.line,{marginTop:0}]}></View>
                 <ScrollView
                     ref={scrollViewRef}
                     onContentSizeChange={handleScrollTo}

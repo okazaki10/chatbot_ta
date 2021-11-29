@@ -6,6 +6,7 @@ import styles from './globalstyles';
 import Splash from './container/splash';
 
 import Chat from './container/chat';
+import Guide from './container/guide';
 
 
 
@@ -24,10 +25,15 @@ function Navigation() {
           component={Splash}
           options={{headerShown:false }}
        />
- 
        <Stack.Screen
           name="Chat"
           component={Chat}
+          options={{headerShown:false }}
+       />
+       
+       <Stack.Screen
+          name="Guide"
+          component={Guide}
           options={{headerShown:false }}
        />
       </Stack.Navigator>
