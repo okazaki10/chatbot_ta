@@ -22,7 +22,7 @@
    '['
  ]);
  global.initialroute = "Splash"
- global.url = "http://192.168.1.9:5000"
+ global.url = "http://192.168.1.3:5000"
  global.nama_lengkap = ""
  global.email = ""
  function App() {
