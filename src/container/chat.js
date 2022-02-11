@@ -7,111 +7,16 @@ import { colors } from '../globalstyles';
 import style from '../globalstyles';
 import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPaperPlane, faQuestion, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane} from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from 'react-native-gesture-handler';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import HyperLink from 'react-native-hyperlink';
 function Chat(props) {
     const { width: DEVICE_WIDTH } = Dimensions.get('window');
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [isipesan, setisipesan] = useState("")
-    const [cari, setcari] = useState("")
-
-    const toggleModal = () => {
-        setModalVisible(!isModalVisible);
-    };
-
-    const storeData = async (key) => {
-        try {
-            await AsyncStorage.setItem('key', key)
-            global.key = key
-        } catch (e) {
-            // saving error
-        }
-    }
-
-    const [spinner, setspinner] = useState(false)
 
     const [isi, setisi] = useState("")
     const [data, setdata] = useState([{ text: 'Halo, perkenalkan aku bot, ceritakan tentang keluhan mu se detail mungkin', id: 1, sender: 'Bot' }])
-    const [totalskor, settotalskor] = useState(0)
-    const [total, settotal] = useState(0)
-    const chat2 = () => {
-
-        if (isi == "") {
-            ToastAndroid.show("Silahkan isi keluhan anda", ToastAndroid.SHORT)
-        } else {
-            data.push({ text: isi, id: 2, sender: 'User' })
-            fetch(global.url + '/?chat=' + isi, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then((response) => response.json())
-                .then((json) => {
-                    console.log(json)
-                    if (json.errors) {
-                        ToastAndroid.show(json.message, ToastAndroid.SHORT)
-                    } else {
-                        var tag = json.data[0].tag
-                        var tagstr = parseInt(tag.substring(4))
-                        console.log(tagstr)
-
-                        var data2 = [...data]
-                        var text = "tag : " + json.data[0].tag + " akurasi : " + json.data[0].accuracy
-                        var pesan = ""
-                        if (tagstr == 0) {
-                            pesan = "\n\nBagus, Sepertinya keluhanmu tidak memiliki gejala depresi"
-                        } else if (tagstr == 1) {
-                            pesan = "\n\nHmm, Sepertinya Keluhanmu memiliki gejala depresi ringan"
-                        } else if (tagstr == 2) {
-                            pesan = "\n\nSepertinya Keluhanmu memiliki gejala depresi sedang, semua pasti bisa dilalui kok (づ ◕‿◕ )づ"
-                        } else if (tagstr == 3) {
-                            pesan = "\n\nSepertinya Keluhanmu memiliki gejala depresi berat, semua pasti ada jalan kok ٩(＾◡＾)۶"
-                        }
-                        data2.push({ text: text + pesan, id: 2, sender: 'Bot' })
-                        setdata(data2)
-
-                        var totalskor2 = totalskor + tagstr
-                        console.log(totalskor)
-                        var total2 = total + 1
-                        settotalskor(totalskor2)
-                        settotal(total2)
-                        if (total2 == 9) {
-                            var skortotal = totalskor2
-                            var teks = ""
-
-                            if (skortotal < 10) {
-                                teks = "skor total : " + skortotal + "\n\nSelamat!, Kamu tidak memiliki gejala depresi. Tetapi tetap hubungi dokter jiwa bila ada perburukan gejala"
-                            } else if (skortotal >= 10 && skortotal < 15) {
-                                teks = "skor total : " + skortotal + "\n\nKamu memiliki gejala depresi ringan. Hubungi dokter jiwa bila gejala dalam 1 bulan bertambah buruk agar dokter bisa memberikan pertimbangan pemberian antidepresan atau psikoterapi singkat"
-                            } else if (skortotal >= 15 && skortotal < 20) {
-                                teks = "skor total : " + skortotal + "\n\nKamu memiliki gejala depresi sedang. Hubungi dokter jiwa agar dokter bisa memberi anjuran untuk memberikan antidepresan atau psikoterapi"
-                            } else if (skortotal >= 20) {
-                                teks = "skor total : " + skortotal + "\n\nKamu memiliki gejala depresi berat. Segera hubungi dokter jiwa agar dokter bisa memberi anjuran untuk memberikan antidepresan secara tunggal atau mengkombinasikan dengan psikoterapi intensif"
-                            }
-
-                            data2.push({ text: teks, id: 2, sender: 'Bot' })
-                            setdata(data2)
-                            settotalskor(0)
-                            settotal(0)
-                        }
-
-                    }
-                    //setspinner(false)
-                })
-                .catch((error) => {
-                    console.error(error)
-                    ToastAndroid.show(error.message == "Network request failed" ? "Mohon nyalakan internet" : error.message, ToastAndroid.SHORT)
-                    //setspinner(false)
-                });
-            setisi("")
-        }
-    }
-
     const chat = () => {
 
         if (isi == "") {
@@ -135,33 +40,44 @@ function Chat(props) {
                         var tagstr = tag.substring(4)
                         var akurasi = json.data[0].accuracy
                         console.log(tagstr)
-
                         var data2 = [...data]
-                        var text = "tag : " + tag + " akurasi : " + akurasi
+
+                        //menampilkan tag dan confidence yang didapatkan dari sistem backend
+                        var text = "tag : " + tag + "\nconfidence : " + akurasi + "\n________________________"
+
+                        //menginisiasi pesan
                         var pesan = ""
                         pesan = pesan + "\n\n"
 
+                        //bot akan memberitahu pengguna bahwa pengguna memiliki gejala bipolar jika tag yang diprediksi adalah tag_bipolar
                         if (tag == "tag_bipolar") {
-                            pesan = pesan + "Keluhan yang kamu alami kemungkinan termasuk ke dalam bipolar"
+                            pesan = pesan + "Sepertinya keluhan yang kamu alami bukanlah depresi melainkan bipolar"
                             pesan = pesan + "\n\nNamun, diagnosis yang disebutkan sebelumnya belum tentu tepat dikarenakan dokter perlu melakukan pemeriksaan secara langsung kepada anda untuk menilai kondisi anda saat ini. Maka dari itu, sebaiknya anda segera berkonsultasi secara langsung dengan dokter psikiater untuk dilakukan pemeriksaan lebih lanjut terhadap kondisi anda. Setelah pemeriksaan, nantinya dokter akan dapat menentukan diagnosis dan penanganan yang tepat seperti dengan psikoterapi atau pemberian obat-obatan tertentu jika memang diperlukan."
+                        //bot akan memberikan pesan tentang gejala depresi secara lengkap beserta sarannya jika tag yang diprediksi adalah tag_depresi
                         } else if (tag == "tag_depresi") {
                             pesan = pesan + "Keluhan yang kamu alami kemungkinan termasuk ke dalam depresi dimana terjadi perubahan suasana hati atau perasaan sedih, putus harapan, dan tidak berharga yang terjadi selama minimal 2 minggu. Depresi yang tidak ditangani dapat menyebabkan penurunan produktifitas kerja, gangguan hubungan sosial, hingga munculnya keinginan untuk bunuh diri seperti yang anda alami saat ini.\n\nDepresi ditandai dengan gejala kecemasan dan kekhawatiran berlebih, dibebani rasa bersalah dan menyalahkan diri sendiri, suasana hati buruk dan sedih berkelanjutan, mudah marah atau menangis, menjadi apatis terhadap lingkungan sekitar, emosional tidak stabil, merasa putus asa atau frustasi, dan selalu merasa lelah dan tidak berharga. Keluhan fisik yang dapat muncul adalah seperti kelelahan dan hilang tenaga, selera makan menurun atau hilang, insomnia ataupun terlalu banyak tidur, merasakan pusing atau nyeri tanpa sebab yang jelas, tidak ada gairah seksual, dan berat badan yang naik ataupun turun secara drastis.\n\nDepresi dapat disebabkan oleh peristiwa traumatis atau tekanan batin sebelumnya, memiliki penyakit kronis, memiliki kepribadian tertentu seperti rendah diri atau pesimis, ketergantungan alkohol/narkoba, riwayat gangguan mental sebelumnya seperti gangguan kecemasan, konsumsi obat rutin tertentu seperti obat tidur atau obat hipertensi, dan memiliki riwayat keluarga dengan penyakit depresi."
                             pesan = pesan + "\n\nNamun, diagnosis yang disebutkan sebelumnya belum tentu tepat dikarenakan dokter perlu melakukan pemeriksaan secara langsung kepada anda untuk menilai kondisi anda saat ini. Maka dari itu, sebaiknya anda segera berkonsultasi secara langsung dengan dokter psikiater untuk dilakukan pemeriksaan lebih lanjut terhadap kondisi anda. Setelah pemeriksaan, nantinya dokter akan dapat menentukan diagnosis dan penanganan yang tepat seperti dengan psikoterapi atau pemberian obat-obatan tertentu jika memang diperlukan."
                             pesan = pesan + "\n\nSementara ini anda dapat melakukan beberapa hal untuk mencegah kondisi anda menjadi memburuk, seperti melakukan relaksasi untuk mengatasi stres (yoga atau pilates), tidur yang cukup minimal 8 jam per hari, hindari konsumsi alkohol, olahraga teratur, berbagi perasaan anda dengan seseorang yang dipercaya, membatasi penggunaan sosial media jika dirasa mengganggu, serta menjauhi orang yang membawa pengaruh buruk."
+                        //bot akan memberitahu pengguna bahwa pengguna memiliki gejala insomnia jika tag yang diprediksi adalah tag_insomnia
                         } else if (tag == "tag_insomnia") {
-                            pesan = pesan + "Keluhan yang kamu alami kemungkinan termasuk ke dalam insomnia"
+                            pesan = pesan + "Sepertinya keluhan yang kamu alami bukanlah depresi melainkan insomnia"
                             pesan = pesan + "\n\nNamun, diagnosis yang disebutkan sebelumnya belum tentu tepat dikarenakan dokter perlu melakukan pemeriksaan secara langsung kepada anda untuk menilai kondisi anda saat ini. Maka dari itu, sebaiknya anda segera berkonsultasi secara langsung dengan dokter psikiater untuk dilakukan pemeriksaan lebih lanjut terhadap kondisi anda. Setelah pemeriksaan, nantinya dokter akan dapat menentukan diagnosis dan penanganan yang tepat seperti dengan psikoterapi atau pemberian obat-obatan tertentu jika memang diperlukan."
+                        //bot akan memberitahu pengguna bahwa pengguna memiliki gejala kecemasan jika tag yang diprediksi adalah tag_kecemasan
                         } else if (tag == "tag_kecemasan") {
-                            pesan = pesan + "Keluhan yang kamu alami kemungkinan termasuk ke dalam kecemasan"
+                            pesan = pesan + "Sepertinya keluhan yang kamu alami bukanlah depresi melainkan kecemasan"
                             pesan = pesan + "\n\nNamun, diagnosis yang disebutkan sebelumnya belum tentu tepat dikarenakan dokter perlu melakukan pemeriksaan secara langsung kepada anda untuk menilai kondisi anda saat ini. Maka dari itu, sebaiknya anda segera berkonsultasi secara langsung dengan dokter psikiater untuk dilakukan pemeriksaan lebih lanjut terhadap kondisi anda. Setelah pemeriksaan, nantinya dokter akan dapat menentukan diagnosis dan penanganan yang tepat seperti dengan psikoterapi atau pemberian obat-obatan tertentu jika memang diperlukan."
+                        //bot akan memberitahu pengguna bahwa pengguna memiliki gejala skizofrenia jika tag yang diprediksi adalah tag_skizofrenia
                         } else if (tag == "tag_skizofrenia") {
-                            pesan = pesan + "Keluhan yang kamu alami kemungkinan termasuk ke dalam skizofrenia"
+                            pesan = pesan + "Sepertinya keluhan yang kamu alami bukanlah depresi melainkan skizofrenia"
                             pesan = pesan + "\n\nNamun, diagnosis yang disebutkan sebelumnya belum tentu tepat dikarenakan dokter perlu melakukan pemeriksaan secara langsung kepada anda untuk menilai kondisi anda saat ini. Maka dari itu, sebaiknya anda segera berkonsultasi secara langsung dengan dokter psikiater untuk dilakukan pemeriksaan lebih lanjut terhadap kondisi anda. Setelah pemeriksaan, nantinya dokter akan dapat menentukan diagnosis dan penanganan yang tepat seperti dengan psikoterapi atau pemberian obat-obatan tertentu jika memang diperlukan."
                         }
+
+                        //jika confidence kurang dari 0.5, maka bot akan memberikan pesan yang menyatakan bahwa bot kurang yakin dengan hasil prediksi dan memberikan link yang menuju ke website alodokter
                         if (akurasi < 0.5) {
                             pesan = "\n\naku kurang yakin sama penyakit yang kamu alami, silahkan bertanya kepada dokter jiwa atau psikiater tentang penyakit yang kamu alami dengan mengklik link dibawah ini"
                             pesan = pesan + "\n\nhttps://www.alodokter.com/komunitas/diskusi/penyakit?showtopic=true"
                         }
+
                         data2.push({ text: text + pesan, id: 2, sender: 'Bot' })
                         setdata(data2)
 
@@ -180,94 +96,38 @@ function Chat(props) {
 
 
 
-    useState(() => {
-        //show()
-        //settoread()
-
-    })
-
-
     const scrollViewRef = useRef()
     const handleScrollTo = (w, h) => {
         if (scrollViewRef.current) {
             scrollViewRef.current.scrollTo({ x: 0, y: h })
         }
     };
-    const [isModalVisible3, setModalVisible3] = useState(false);
-    const toggleModal3 = () => {
-        setModalVisible3(!isModalVisible3);
-    };
-    const [isModalVisible2, setModalVisible2] = useState(false);
-    const toggleModal2 = () => {
-        setModalVisible2(!isModalVisible2);
-    };
-    const [itemid, setitemid] = useState()
+
     return (
         <View style={style.main}>
             <StatusBar backgroundColor={colors.primary} />
-            <Modal isVisible={isModalVisible3}
-                onBackdropPress={toggleModal3}
-                onBackButtonPress={toggleModal3}>
-                <View style={style.content}>
-                    <Text style={[style.nunitosans, { textAlign: "center" }]}>Ubah Pesan</Text>
-                    <TextInput onChangeText={setcari} autoCapitalize="none" style={[style.card, { elevation: 5, marginTop: 30, flex: 0 }]} placeholder="Message"></TextInput>
-                    <View style={{ flexDirection: "row", marginTop: 40 }}>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            <Button onPress={() => {
-                                ubah()
-                                toggleModal3()
-                            }} title="Ubah" titleStyle={[style.nunitosans, { textAlign: "center", color: "#E3DB69" }]} buttonStyle={{ backgroundColor: "white" }}></Button>
-                        </View>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            <Button onPress={toggleModal3} title="Batal" titleStyle={[style.nunitosans, { textAlign: "center", color: "black" }]} buttonStyle={{ backgroundColor: "white" }}>
-                            </Button>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            <Modal isVisible={isModalVisible2}
-                onBackdropPress={toggleModal2}
-                onBackButtonPress={toggleModal2}>
-                <View style={style.content}>
-                    <Text style={[style.nunitosans, { textAlign: "center" }]}>Pilih tindakan untuk mengubah pesan</Text>
-                    <View style={{ flexDirection: "row", marginTop: 40 }}>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            <Button onPress={() => {
-                                hapus()
-                                toggleModal2()
-                            }} title="Hapus" titleStyle={[style.nunitosans, { textAlign: "center", color: "red" }]} buttonStyle={{ backgroundColor: "white" }}></Button>
-                        </View>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            <Button onPress={() => {
-                                toggleModal3()
-                                toggleModal2()
-                            }} title="Ubah" titleStyle={[style.nunitosans, { textAlign: "center", color: "#E3DB69" }]} buttonStyle={{ backgroundColor: "white" }}>
-                            </Button>
-                        </View>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                            <Button onPress={toggleModal2} title="Batal" titleStyle={[style.nunitosans, { textAlign: "center", color: "black" }]} buttonStyle={{ backgroundColor: "white" }}>
-                            </Button>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+       
+     
 
             <View style={{ flex: 1 }}>
                 <View style={{ alignItems: "center", justifyContent: "center", height: 50, flexDirection: "row" }}>
                     <View style={{ flex: 1 }}></View>
                     <Text style={{ fontSize: 28, fontWeight: "bold" }}>Chat</Text>
+
                     <View style={{ flex: 1, alignItems: "flex-end", marginRight: 20 }}>
+                        {/*
                         <TouchableOpacity onPress={() => { props.navigation.navigate("Guide") }}>
                             <FontAwesomeIcon icon={faQuestion} size={24} color={colors.primary} />
                         </TouchableOpacity>
+                        */}
                     </View>
+
                 </View>
                 <View style={[style.line, { marginTop: 0 }]}></View>
                 <ScrollView
                     ref={scrollViewRef}
                     onContentSizeChange={handleScrollTo}
                 >
-
                     <View style={{ padding: 3 }}>
                         {data.map((item) => item.text ? (<View>
                             {item.sender != 'Bot' ? (
